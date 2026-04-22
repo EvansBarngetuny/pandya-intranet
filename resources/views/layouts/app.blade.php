@@ -1,40 +1,41 @@
+{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pandya Memorial Hospital - Memos</title>
-    @vite('resources/css/app.css')
-    @livewireStyles
-</head>
-<body class="bg-gray-100">
-    <div class="min-h-screen">
-        <!-- Simple Header -->
-        <header class="bg-white shadow">
-            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        Pandya Memorial Hospital
-                    </h1>
-                    <div class="flex items-center gap-4">
-                        <span class="text-gray-600">{{ auth()->user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-red-600 hover:text-red-800">Logout</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </header>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#2563eb">
 
-        <!-- Main Content -->
-        <main>
-            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                {{ $slot }}
-            </div>
-        </main>
+    <title>PICS - Pandya Internal Communication System</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+
+    <!-- Styles -->
+    @vite(['resources/css/app.css'])
+    @livewireStyles
+
+    <!-- PWA Meta -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body class="font-sans antialiased bg-gray-50">
+    <div class="min-h-screen">
+        {{ $slot }}
     </div>
 
     @livewireScripts
+    @stack('scripts')
+    @stack('styles')
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
 </body>
 </html>

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamp('read_at');
             $table->timestamps();
+            $table->unique(['memo_id', 'user_id']);
         });
     }
 

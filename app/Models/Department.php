@@ -11,6 +11,10 @@ class Department extends Model
         'name',
         'code',
         'head_of_department',
+        'icon',
+        'color',
+        'staff_count',
+        'is_active',
     ];
     public function users()
     {

@@ -30,10 +30,10 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+        'name', 'email', 'password', 'staff_number', 'department_id',
+        'role', 'phone', 'profile_photo', 'position', 'is_active',
+        'hire_date', 'permissions'
+            ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,6 +45,12 @@ class User extends Authenticatable
         'remember_token',
         'two_factor_recovery_codes',
         'two_factor_secret',
+    ];
+
+     protected $casts = [
+        'is_active' => 'boolean',
+        'hire_date' => 'date',
+        'permissions' => 'array'
     ];
 
     /**
@@ -74,4 +80,67 @@ class User extends Authenticatable
         ->withPivot('read_at')
         ->withTimestamps();
 }
+// Role checks
+public function isAdmin() { return $this->role === 'admin'; }
+public function isHOD() { return $this->role === 'hod'; }
+public function isStaff() { return $this->role === 'staff'; }
+// Permission checks
+    public function canCreateMemos()
+    {
+        return in_array($this->role, ['admin', 'hod']);
+    }
+    public function canPublishNews()
+    {
+        return in_array($this->role, ['admin']);
+    }
+     public function canManageStaff()
+    {
+        return in_array($this->role, ['admin']);
+    }
+    public function canViewReports()
+    {
+        return in_array($this->role, ['admin', 'hod']);
+    }
+      // Relationships
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+     public function createdMemos()
+    {
+        return $this->hasMany(Memo::class, 'created_by');
+    }
+       public function memoAcknowledgments()
+    {
+        return $this->hasMany(MemoAcknowledgment::class);
+    }
+       public function unreadMemos()
+    {
+        return Memo::where('status', 'published')
+            ->whereDoesntHave('acknowledgments', function($q) {
+                $q->where('user_id', $this->id);
+            })
+            ->where(function($q) {
+                $q->where('audience_type', 'all')
+                    ->orWhere(function($q2) {
+                        $q2->where('audience_type', 'departments')
+                            ->whereJsonContains('audience_ids', $this->department_id);
+                    })
+                    ->orWhere(function($q2) {
+                        $q2->where('audience_type', 'specific_users')
+                            ->whereJsonContains('audience_ids', $this->id);
+                    });
+            })->get();
+    }
+    public function unreadNotifications()
+    {
+        return $this->hasMany(Notification::class)->where('is_read', false);
+    }
+     public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo) {
+            return asset('storage/' . $this->profile_photo);
+        }
+        return 'https://ui-avatars.com/api/?background=2563eb&color=fff&name=' . urlencode($this->name);
+    }
 }

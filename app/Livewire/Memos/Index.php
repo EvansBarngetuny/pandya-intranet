@@ -85,18 +85,27 @@ class Index extends Component
         session()->flash('message', 'Memo published successfully!');
     }
 
-    public function markAsRead($memoId)
-    {
-        $memo = Memo::findOrFail($memoId);
+   public function markAsRead($memoId)
+{
+    $alreadyRead = \DB::table('memo_reads')
+        ->where('memo_id', $memoId)
+        ->where('user_id', auth()->id())
+        ->exists();
 
-        // Check if already marked as read
-        if (!$memo->readBy->contains(auth()->id())) {
-            $memo->readBy()->attach(auth()->id(), ['read_at' => now()]);
-            session()->flash('message', 'Memo marked as read!');
-        }
+    if (!$alreadyRead) {
+        \DB::table('memo_reads')->insert([
+            'memo_id' => $memoId,
+            'user_id' => auth()->id(),
+            'read_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-        $this->dispatch('memo-read');
+        session()->flash('message', 'Memo marked as read!');
     }
+
+    $this->dispatch('memo-read');
+}
 
     public function updatingSearch()
     {
@@ -127,6 +136,7 @@ class Index extends Component
 
         $departments = Department::all();
         $users = User::all();
+        // Update the markAsRead method in app/Livewire/Memos/Index.php
 
         return view('livewire.memos.index', [
             'memos' => $memos,

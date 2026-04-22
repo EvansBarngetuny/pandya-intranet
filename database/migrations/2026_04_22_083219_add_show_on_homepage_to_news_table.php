@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('news', function (Blueprint $table) {
             //
-            $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
+            $table->boolean('show_on_homepage')
+                ->default(true)
+                ->after('is_pinned');
         });
     }
 
@@ -22,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('news', function (Blueprint $table) {
             //
         });
     }

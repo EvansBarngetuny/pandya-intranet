@@ -12,15 +12,33 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->foreignId('current_team_id')->nullable();
-            $table->string('profile_photo_path', 2048)->nullable();
-            $table->timestamps();
+             $table->id();
+
+    $table->string('staff_number')->unique();
+
+    $table->string('name');
+    $table->string('email')->unique();
+    $table->timestamp('email_verified_at')->nullable();
+    $table->string('password');
+
+    $table->foreignId('department_id')
+        ->nullable()
+        ->constrained('departments')
+        ->nullOnDelete();
+
+    $table->enum('role', ['admin', 'hod', 'staff'])->default('staff');
+    $table->string('phone')->nullable();
+    $table->string('position')->nullable();
+    $table->boolean('is_active')->default(true);
+    $table->date('hire_date')->nullable();
+    $table->json('permissions')->nullable();
+
+    // Jetstream
+    $table->rememberToken();
+    $table->foreignId('current_team_id')->nullable();
+    $table->string('profile_photo_path', 2048)->nullable();
+
+    $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
