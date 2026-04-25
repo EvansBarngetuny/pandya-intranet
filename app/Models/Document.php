@@ -10,17 +10,24 @@ class Document extends Model
 
     protected $fillable = [
         'title',
-        'file_path',
-        'uploaded_by',
-        'department_id',
+        'description',
         'category',
-        'tags',
-        'is_public',
+        'file_path',
+        'file_name',
+        'file_size',
+        'file_type',
+        'uploaded_by',
+        'download_count',
+        'version',
+        'effective_date',
+        'is_active',
+        'accessible_roles',
     ];
 
     protected $casts = [
-        'tags' => 'array',
-        'is_public' => 'boolean',
+        'effective_date' => 'date',
+        'is_active' => 'boolean',
+        'accessible_roles' => 'array',
     ];
 
     public function uploader()

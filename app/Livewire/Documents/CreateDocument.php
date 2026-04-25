@@ -39,23 +39,22 @@ class CreateDocument extends Component
 
         // Store file
         $path = $this->file->store('documents/' . $this->category, 'public');
-        
-        // Get file size
-        $fileSize = $this->formatBytes($this->file->getSize());
 
-        // Create document record
+        // Create document record with ALL required fields
         Document::create([
             'title' => $this->title,
             'description' => $this->description,
             'category' => $this->category,
             'file_path' => $path,
-            'file_name' => $this->file->getClientOriginalName(),
-            'file_size' => $fileSize,
-            'file_type' => $this->file->getMimeType(),
+            'file_name' => $this->file->getClientOriginalName(), // REQUIRED
+            'file_size' => $this->formatBytes($this->file->getSize()), // REQUIRED
+            'file_type' => $this->file->getMimeType(), // REQUIRED
             'uploaded_by' => auth()->id(),
-            'version' => $this->version,
+            'download_count' => 0, // REQUIRED (default 0)
+            'version' => $this->version, // REQUIRED (default 1)
             'effective_date' => $this->effective_date,
-            'is_active' => $this->is_active,
+            'is_active' => $this->is_active, // REQUIRED (default 1)
+            'accessible_roles' => null, // Optional
         ]);
 
         session()->flash('message', 'Document uploaded successfully!');

@@ -37,7 +37,7 @@ class EditStaff extends Component
         $this->role = $user->role;
         $this->phone = $user->phone;
         $this->position = $user->position;
-        $this->existing_photo = $user->profile_photo;
+        $this->existing_photo = $user->profile_photo_path; // Changed from profile_photo to profile_photo_path
         $this->hire_date = $user->hire_date?->format('Y-m-d');
         $this->is_active = $user->is_active;
     }
@@ -62,13 +62,13 @@ class EditStaff extends Component
     public function update()
     {
         $this->validate();
-        
-        // Save profile photo if uploaded
+
+        // Save profile photo if uploaded - use profile_photo_path
         if ($this->profile_photo) {
             $photoPath = $this->profile_photo->store('profile-photos', 'public');
-            $this->user->profile_photo = $photoPath;
+            $this->user->profile_photo_path = $photoPath;
         }
-        
+
         $updateData = [
             'name' => $this->name,
             'email' => $this->email,
@@ -80,14 +80,14 @@ class EditStaff extends Component
             'hire_date' => $this->hire_date,
             'is_active' => $this->is_active,
         ];
-        
+
         // Update password if provided
         if ($this->password) {
             $updateData['password'] = Hash::make($this->password);
         }
-        
+
         $this->user->update($updateData);
-        
+
         session()->flash('message', "Staff member {$this->user->name} updated successfully!");
         return redirect()->route('admin.staff.index');
     }

@@ -52,27 +52,28 @@ class CreateStaff extends Component
         $lastStaff = User::whereYear('created_at', $year)
             ->orderBy('id', 'desc')
             ->first();
-        
-        if ($lastStaff) {
-            $lastNumber = intval(substr($lastStaff->staff_number, -4));
+
+        if ($lastStaff && $lastStaff->staff_number) {
+            $parts = explode('/', $lastStaff->staff_number);
+            $lastNumber = intval(end($parts));
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $newNumber = '0001';
         }
-        
+
         $this->staff_number = "STAFF/{$year}/{$newNumber}";
     }
 
     public function save()
     {
         $this->validate();
-        
-        // Save profile photo
+
+        // Save profile photo - use profile_photo_path instead of profile_photo
         $photoPath = null;
         if ($this->profile_photo) {
             $photoPath = $this->profile_photo->store('profile-photos', 'public');
         }
-        
+
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
@@ -82,11 +83,11 @@ class CreateStaff extends Component
             'role' => $this->role,
             'phone' => $this->phone,
             'position' => $this->position,
-            'profile_photo' => $photoPath,
+            'profile_photo_path' => $photoPath, // Changed from profile_photo to profile_photo_path
             'hire_date' => $this->hire_date,
             'is_active' => $this->is_active,
         ]);
-        
+
         session()->flash('message', "Staff member {$user->name} created successfully!");
         return redirect()->route('admin.staff.index');
     }
