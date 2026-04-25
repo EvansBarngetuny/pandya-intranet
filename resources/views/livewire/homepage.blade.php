@@ -1,89 +1,5 @@
 {{-- resources/views/livewire/homepage.blade.php --}}
 <div class="min-h-screen bg-gray-50" x-data="{ showNotifications: false }">
-    <!-- Top Navigation Bar -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center">
-                        <span class="text-2xl mr-2">🏥</span>
-                        <span class="text-xl font-bold text-gray-800">PICS</span>
-                        <span class="ml-2 text-sm text-gray-500">Pandya Internal Communication System</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-4">
-                    <!-- Search -->
-                    <div class="hidden md:block">
-                        <div class="relative">
-                            <input type="text" 
-                                   placeholder="Search menus..." 
-                                   class="w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500">
-                            <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <!-- Notifications -->
-                    <div class="relative" x-on:click.away="showNotifications = false">
-                        <button @click="showNotifications = !showNotifications"
-                                class="relative p-2 rounded-full hover:bg-gray-100">
-                            <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                            </svg>
-                            @if($notifications->count() > 0)
-                                <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                            @endif
-                        </button>
-
-                        <div x-show="showNotifications"
-                             x-transition
-                             class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg overflow-hidden z-50">
-                            <div class="p-3 bg-gray-50 border-b flex justify-between items-center">
-                                <h3 class="font-semibold text-gray-800">Notifications</h3>
-                                @if($notifications->count() > 0)
-                                    <button wire:click="markAllNotificationsRead" class="text-xs text-blue-600 hover:text-blue-800">
-                                        Mark all read
-                                    </button>
-                                @endif
-                            </div>
-                            <div class="max-h-96 overflow-y-auto">
-                                @forelse($notifications as $notification)
-                                    <div class="p-3 hover:bg-gray-50 border-b cursor-pointer"
-                                         wire:click="markNotificationRead({{ $notification->id }})">
-                                        <p class="text-sm font-medium text-gray-800">{{ $notification->title }}</p>
-                                        <p class="text-xs text-gray-500 mt-1">{{ $notification->message }}</p>
-                                        <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
-                                    </div>
-                                @empty
-                                    <div class="p-6 text-center text-gray-500">
-                                        <p>No new notifications</p>
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- User Menu -->
-                    <div class="relative">
-                        <div class="flex items-center space-x-3">
-                            <img src="{{ auth()->user()->profile_photo_url }}"
-                                 class="h-8 w-8 rounded-full object-cover">
-                            <div class="hidden md:block">
-                                <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</p>
-                                <p class="text-xs text-gray-500">
-                                    {{ ucfirst(auth()->user()->role) }} • {{ auth()->user()->department->name ?? 'No Dept' }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -242,7 +158,7 @@
         @if(count($quickActions) > 0)
         <div class="mb-8">
             <h2 class="text-lg font-semibold text-gray-800 mb-3">Quick Actions</h2>
-            <div class="grid grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 @foreach($quickActions as $action)
                 <a href="{{ route($action['route']) }}" class="group">
                     <div class="bg-white rounded-xl shadow p-4 text-center hover:shadow-lg transition group">
@@ -255,236 +171,221 @@
                 @endforeach
             </div>
         </div>
-        @endif
+        @endif 
 
-        <!-- Applications Section - Proper 5 Columns Per Row -->
+        <!-- Applications Section -->
         <div class="mb-10">
-    <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center pb-2 border-b">
-        📱 Applications
-    </h2>
-    
-    <!-- ROW 1: Core Applications -->
-    <div class="flex justify-between gap-4 mb-6 w-full">
-        <!-- News -->
-        <div class="flex-1">
-            <a href="{{ route('news.index') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📰</div>
-                    <div class="label">News</div>
-                </div>
-            </a>
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center pb-2 border-b">
+                📱 Applications
+            </h2>
+
+            <!-- ROW 1: Core Applications -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+                <!-- News -->
+                <a href="{{ route('news.index') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📰</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">News</h3>
+                        <p class="text-xs text-gray-500 mt-1">Announcements</p>
+                    </div>
+                </a>
+
+                <!-- Memos -->
+                <a href="{{ route('memos.index') }}" class="block relative">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📄</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Memos</h3>
+                        <p class="text-xs text-gray-500 mt-1">Official</p>
+                        @if($unreadMemosCount > 0)
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ $unreadMemosCount }}
+                            </span>
+                        @endif
+                    </div>
+                </a>
+
+                <!-- Events -->
+                <a href="{{ route('events.index') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📅</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Events</h3>
+                        <p class="text-xs text-gray-500 mt-1">Trainings</p>
+                    </div>
+                </a>
+
+                <!-- Policies/Documents -->
+                <a href="{{ route('documents.index') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📚</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Policies</h3>
+                        <p class="text-xs text-gray-500 mt-1">SOPs & Forms</p>
+                    </div>
+                </a>
+
+                <!-- Acknowledge Memos -->
+                <a href="{{ route('memos.pending') }}" class="block relative">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">✅</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Acknowledge</h3>
+                        <p class="text-xs text-gray-500 mt-1">Mark as read</p>
+                        @if($unreadMemosCount > 0)
+                            <span class="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ $unreadMemosCount }}
+                            </span>
+                        @endif
+                    </div>
+                </a>
+            </div>
+
+            <!-- ROW 2: User Related Applications -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+                <!-- My Profile -->
+                <a href="{{ route('profile.show') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">👤</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">My Profile</h3>
+                        <p class="text-xs text-gray-500 mt-1">View info</p>
+                    </div>
+                </a>
+
+                @if(auth()->user()->canViewReports())
+                <a href="{{ auth()->user()->isAdmin() ? route('admin.reports') : route('hod.reports') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📊</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Reports</h3>
+                        <p class="text-xs text-gray-500 mt-1">Analytics</p>
+                    </div>
+                </a>
+                @endif
+
+                @if(auth()->user()->canManageStaff())
+                <a href="{{ route('admin.staff.index') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">👥</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Staff</h3>
+                        <p class="text-xs text-gray-500 mt-1">Directory</p>
+                    </div>
+                </a>
+                @endif
+
+                @if(auth()->user()->isAdmin())
+                <a href="{{ route('admin.departments') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">🏢</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Departments</h3>
+                        <p class="text-xs text-gray-500 mt-1">Manage</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.settings') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">⚙️</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Settings</h3>
+                        <p class="text-xs text-gray-500 mt-1">Configure</p>
+                    </div>
+                </a>
+                @elseif(auth()->user()->isHOD())
+                <a href="{{ route('hod.staff') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">👥</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Dept Staff</h3>
+                        <p class="text-xs text-gray-500 mt-1">My Team</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hod.reports') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📈</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Dept Reports</h3>
+                        <p class="text-xs text-gray-500 mt-1">Analytics</p>
+                    </div>
+                </a>
+                @endif
+            </div>
+
+            <!-- ROW 3: Admin Only Applications -->
+            @if(auth()->user()->isAdmin())
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">🔐</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Audit Logs</h3>
+                        <p class="text-xs text-gray-500 mt-1">Security</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">💾</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Backup</h3>
+                        <p class="text-xs text-gray-500 mt-1">Database</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📧</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Email Logs</h3>
+                        <p class="text-xs text-gray-500 mt-1">History</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">🔄</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">System Sync</h3>
+                        <p class="text-xs text-gray-500 mt-1">Integration</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📊</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Analytics</h3>
+                        <p class="text-xs text-gray-500 mt-1">Insights</p>
+                    </div>
+                </a>
+            </div>
+            @endif
+
+            <!-- ROW 3 for HOD -->
+            @if(auth()->user()->isHOD())
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📋</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Staff Leave</h3>
+                        <p class="text-xs text-gray-500 mt-1">Requests</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">⏰</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Attendance</h3>
+                        <p class="text-xs text-gray-500 mt-1">Tracking</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📝</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Evaluations</h3>
+                        <p class="text-xs text-gray-500 mt-1">Performance</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📅</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Schedule</h3>
+                        <p class="text-xs text-gray-500 mt-1">Roster</p>
+                    </div>
+                </a>
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+                        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📢</div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Announcements</h3>
+                        <p class="text-xs text-gray-500 mt-1">Updates</p>
+                    </div>
+                </a>
+            </div>
+            @endif
         </div>
 
-        <!-- Memos -->
-        <div class="flex-1">
-            <a href="{{ route('memos.index') }}" class="group relative block">
-                <div class="app-tile">
-                    <div class="icon">📄</div>
-                    <div class="label">Memos</div>
-                    @if($unreadMemosCount > 0)
-                        <span class="badge">{{ $unreadMemosCount }}</span>
-                    @endif
-                </div>
-            </a>
-        </div>
-
-        <!-- Events -->
-        <div class="flex-1">
-            <a href="{{ route('events.index') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📅</div>
-                    <div class="label">Events</div>
-                </div>
-            </a>
-        </div>
-
-        <!-- Policies/Documents -->
-        <div class="flex-1">
-            <a href="{{ route('documents.index') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📚</div>
-                    <div class="label">Policies</div>
-                </div>
-            </a>
-        </div>
-
-        <!-- Acknowledge Memos -->
-        <div class="flex-1">
-            <a href="{{ route('memos.pending') }}" class="group relative block">
-                <div class="app-tile">
-                    <div class="icon">✅</div>
-                    <div class="label">Acknowledge</div>
-                    @if($unreadMemosCount > 0)
-                        <span class="badge">{{ $unreadMemosCount }}</span>
-                    @endif
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- ROW 2: User Related Applications -->
-    <div class="flex justify-between gap-4 mb-6 w-full">
-        <!-- My Profile -->
-        <div class="flex-1">
-            <a href="{{ route('profile.show') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">👤</div>
-                    <div class="label">My Profile</div>
-                </div>
-            </a>
-        </div>
-
-        @if(auth()->user()->canViewReports())
-        <div class="flex-1">
-            <a href="{{ auth()->user()->isAdmin() ? route('admin.reports') : route('hod.reports') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📊</div>
-                    <div class="label">Reports</div>
-                </div>
-            </a>
-        </div>
-        @endif
-
-        @if(auth()->user()->canManageStaff())
-        <div class="flex-1">
-            <a href="{{ route('admin.staff.index') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">👥</div>
-                    <div class="label">Staff</div>
-                </div>
-            </a>
-        </div>
-        @endif
-
-        @if(auth()->user()->isAdmin())
-        <div class="flex-1">
-            <a href="{{ route('admin.departments') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">🏢</div>
-                    <div class="label">Departments</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="{{ route('admin.settings') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">⚙️</div>
-                    <div class="label">Settings</div>
-                </div>
-            </a>
-        </div>
-        @elseif(auth()->user()->isHOD())
-        <div class="flex-1">
-            <a href="{{ route('hod.staff') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">👥</div>
-                    <div class="label">Dept Staff</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="{{ route('hod.reports') }}" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📈</div>
-                    <div class="label">Dept Reports</div>
-                </div>
-            </a>
-        </div>
-        @endif
-    </div>
-
-    <!-- ROW 3: Admin Only Applications -->
-    @if(auth()->user()->isAdmin())
-    <div class="flex justify-between gap-4 mb-6 w-full">
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">🔐</div>
-                    <div class="label">Audit Logs</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">💾</div>
-                    <div class="label">Backup</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📧</div>
-                    <div class="label">Email Logs</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">🔄</div>
-                    <div class="label">System Sync</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📊</div>
-                    <div class="label">Analytics</div>
-                </div>
-            </a>
-        </div>
-    </div>
-    @endif
-
-    <!-- ROW 3 for HOD -->
-    @if(auth()->user()->isHOD())
-    <div class="flex justify-between gap-4 mb-6 w-full">
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📋</div>
-                    <div class="label">Staff Leave</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">⏰</div>
-                    <div class="label">Attendance</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📝</div>
-                    <div class="label">Evaluations</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📅</div>
-                    <div class="label">Schedule</div>
-                </div>
-            </a>
-        </div>
-        <div class="flex-1">
-            <a href="#" class="group block">
-                <div class="app-tile">
-                    <div class="icon">📢</div>
-                    <div class="label">Announcements</div>
-                </div>
-            </a>
-        </div>
-    </div>
-    @endif   
-</div>
         <!-- Recent Updates Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
             <!-- Recent News -->
@@ -666,95 +567,12 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-  .app-tile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background: white;
-    border-radius: 16px;
-    padding: 20px 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    transition: all 0.25s ease;
-    text-align: center;
-    cursor: pointer;
-    border: 1px solid #e5e7eb;
-    min-height: 110px;
-    width: 100%; /* Ensure tile takes full width of its container */
-}
 
-.app-tile:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    border-color: #3b82f6;
-    background: #f8fafc;
-}
-
-.icon {
-    font-size: 36px;
-    margin-bottom: 10px;
-    transition: transform 0.2s ease;
-}
-
-.group:hover .icon {
-    transform: scale(1.1);
-}
-
-.label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #374151;
-    text-align: center;
-}
-
-.badge {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    background: #ef4444;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 9999px;
-    min-width: 20px;
-    text-align: center;
-}
-
-/* Ensure grid containers take full width */
-.grid-cols-5 {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    width: 100%;
-}
-
-/* Make sure the parent container doesn't restrict width */
-.max-w-7xl {
-    max-width: 80rem;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .app-tile {
-        padding: 12px 8px;
-        min-height: 90px;
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .grid-cols-5 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
     }
-    .icon {
-        font-size: 28px;
-    }
-    .label {
-        font-size: 10px;
-    }
-}
-
-/* For smaller screens, reduce columns */
-@media (max-width: 640px) {
-    .grid-cols-5 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
 </style>
 @endpush

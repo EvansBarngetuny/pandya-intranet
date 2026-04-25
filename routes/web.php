@@ -31,10 +31,10 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    
+
     // Homepage (Dashboard)
     Route::get('/', Homepage::class)->name('home');
-    
+
     // Memo routes
     Route::prefix('memos')->name('memos.')->group(function () {
         Route::get('/', MemoIndex::class)->name('index');
@@ -43,33 +43,36 @@ Route::middleware([
         Route::get('/{memo}', ShowMemo::class)->name('show');
         Route::get('/{memo}/edit', EditMemo::class)->name('edit');
     });
-    
+
     // News routes
     Route::prefix('news')->name('news.')->group(function () {
         Route::get('/', NewsIndex::class)->name('index');
         Route::get('/create', CreateNews::class)->name('create');
         Route::get('/{news}', ShowNews::class)->name('show');
     });
-    
+
     // Events routes
     Route::prefix('events')->name('events.')->group(function () {
         Route::get('/', EventIndex::class)->name('index');
+        Route::get('/calendar', \App\Livewire\Events\Calendar::class)->name('calendar');
+        Route::get('/create', \App\Livewire\Events\CreateEvent::class)->name('create');
         Route::get('/{event}', ShowEvent::class)->name('show');
+        Route::get('/{event}/edit', \App\Livewire\Events\EditEvent::class)->name('edit');
     });
-    
+
     // Documents routes
     Route::prefix('documents')->name('documents.')->group(function () {
         Route::get('/', DocumentIndex::class)->name('index');
         Route::get('/create', CreateDocument::class)->name('create');
         Route::get('/{document}', ShowDocument::class)->name('show');
     });
-    
+
     // Profile routes
     //Route::prefix('profile')->name('profile.')->group(function () {
       //  Route::get('/', ShowProfile::class)->name('show');
         //Route::get('/edit', EditProfile::class)->name('edit');
     //});
-    
+
     // Reports redirect route
     Route::get('/reports', function () {
         $user = auth()->user();
@@ -80,7 +83,7 @@ Route::middleware([
         }
         abort(403, 'You do not have permission to view reports.');
     })->name('reports.index');
-    
+
     // Staff directory redirect route
     Route::get('/staff', function () {
         if (auth()->user()->isAdmin()) {
@@ -88,7 +91,7 @@ Route::middleware([
         }
         abort(403, 'You do not have permission to view staff directory.');
     })->name('staff.index');
-    
+
     // Admin only routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/staff', \App\Livewire\Admin\StaffIndex::class)->name('staff.index');
@@ -99,14 +102,14 @@ Route::middleware([
         Route::get('/departments', \App\Livewire\Admin\Departments::class)->name('departments');
         Route::get('/settings', \App\Livewire\Admin\Settings::class)->name('settings');
     });
-    
+
     // HOD only routes
     Route::prefix('hod')->name('hod.')->group(function () {
         Route::get('/department-staff', \App\Livewire\Hod\DepartmentStaff::class)->name('staff');
         Route::get('/department-staff/{user}', \App\Livewire\Hod\StaffShow::class)->name('staff.show');
         Route::get('/dept-reports', \App\Livewire\Hod\DepartmentReports::class)->name('reports');
     });
-    
+
     // Logout - Jetstream handles this, but keep for reference
     Route::post('/logout', function () {
         auth()->logout();
@@ -114,4 +117,13 @@ Route::middleware([
         request()->session()->regenerateToken();
         return redirect('/login');
     })->name('logout');
+});
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 });

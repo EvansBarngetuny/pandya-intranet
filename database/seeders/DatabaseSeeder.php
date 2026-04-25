@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Department;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,22 +13,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-          $departments = [
-            ['name' => 'Administration', 'code' => 'ADMIN', 'head_of_department' => 'Henry Longei', 'icon' => '👔'],
-            ['name' => 'Medical Services', 'code' => 'MED', 'head_of_department' => 'Dr. Herbert Kayonga', 'icon' => '🩺'],
-            ['name' => 'Nursing', 'code' => 'NURSE', 'head_of_department' => 'Ismail Onchari', 'icon' => '💉'],
-            ['name' => 'Pharmacy', 'code' => 'PHARM', 'head_of_department' => 'Lilian Kibuchi', 'icon' => '💊'],
-            ['name' => 'Laboratory', 'code' => 'LAB', 'head_of_department' => 'Peter Ndalu', 'icon' => '🔬'],
-            ['name' => 'Radiology', 'code' => 'RAD', 'head_of_department' => 'Fredrick Mukie', 'icon' => '📊'],
-            ['name' => 'Finance', 'code' => 'FIN', 'head_of_department' => 'Vivek Sethi', 'icon' => '💰'],
-            ['name' => 'Human Resources', 'code' => 'HR', 'head_of_department' => 'Miriam Murage', 'icon' => '👥'],
-            ['name' => 'ICT', 'code' => 'ICT', 'head_of_department' => 'Vincent Mutua', 'icon' => '💻'],
+        // User::factory(10)->withPersonalTeam()->create();
+           $departments = [
+            ['name' => 'Administration', 'code' => 'ADMIN', 'hod_name' => 'Dr. Sarah Johnson', 'icon' => '👔'],
+            ['name' => 'Medical Services', 'code' => 'MED', 'hod_name' => 'Dr. James Mwangi', 'icon' => '🩺'],
+            ['name' => 'Nursing', 'code' => 'NURSE', 'hod_name' => 'Mary Wanjiku', 'icon' => '💉'],
+            ['name' => 'Pharmacy', 'code' => 'PHARM', 'hod_name' => 'Peter Omondi', 'icon' => '💊'],
+            ['name' => 'Laboratory', 'code' => 'LAB', 'hod_name' => 'Grace Akinyi', 'icon' => '🔬'],
+            ['name' => 'Radiology', 'code' => 'RAD', 'hod_name' => 'Dr. Michael Otieno', 'icon' => '📊'],
+            ['name' => 'Finance', 'code' => 'FIN', 'hod_name' => 'John Kariuki', 'icon' => '💰'],
+            ['name' => 'Human Resources', 'code' => 'HR', 'hod_name' => 'Jane Nduta', 'icon' => '👥'],
+            ['name' => 'ICT', 'code' => 'ICT', 'hod_name' => 'Evans Ochieng', 'icon' => '💻'],
         ];
-        foreach ($departments as $dept) {
+         foreach ($departments as $dept) {
             Department::create($dept);
         }
-        // User::factory(10)->withPersonalTeam()->create();
-        User::create([
+          User::create([
             'name' => 'System Admin',
             'email' => 'admin@pandya-hospital.org',
             'staff_number' => 'ADMIN001',
@@ -41,14 +39,13 @@ class DatabaseSeeder extends Seeder
             'position' => 'System Administrator',
             'is_active' => true,
         ]);
-         // Create HOD users
-        $hods = [
-            ['name' => 'Henry Longei', 'email' => 'hod.admin@pandya-hospital.org', 'staff_number' => 'HOD001', 'dept' => 'ADMIN'],
-            ['name' => 'Dr. Herbert Kayonga', 'email' => 'hod.medical@pandya-hospital.org', 'staff_number' => 'HOD002', 'dept' => 'MED'],
-            ['name' => 'Ismail Onchari', 'email' => 'hod.nursing@pandya-hospital.org', 'staff_number' => 'HOD003', 'dept' => 'NURSE'],
-            ['name' => 'Vincent Mutua', 'email' => 'hod.ict@pandya-hospital.org', 'staff_number' => 'HOD004', 'dept' => 'ICT'],
+          $hods = [
+            ['name' => 'Dr. Sarah Johnson', 'email' => 'hod.admin@pandya-hospital.org', 'staff_number' => 'HOD001', 'dept' => 'ADMIN'],
+            ['name' => 'Dr. James Mwangi', 'email' => 'hod.medical@pandya-hospital.org', 'staff_number' => 'HOD002', 'dept' => 'MED'],
+            ['name' => 'Mary Wanjiku', 'email' => 'hod.nursing@pandya-hospital.org', 'staff_number' => 'HOD003', 'dept' => 'NURSE'],
+            ['name' => 'Evans Ochieng', 'email' => 'hod.ict@pandya-hospital.org', 'staff_number' => 'HOD004', 'dept' => 'ICT'],
         ];
-           foreach ($hods as $hod) {
+            foreach ($hods as $hod) {
             User::create([
                 'name' => $hod['name'],
                 'email' => $hod['email'],
@@ -62,7 +59,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // Create sample staff
+        User::factory()->withPersonalTeam()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
+            // Create sample staff
         for ($i = 1; $i <= 20; $i++) {
             User::create([
                 'name' => "Staff Member $i",

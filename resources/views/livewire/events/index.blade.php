@@ -1,5 +1,6 @@
 {{-- resources/views/livewire/events/index.blade.php --}}
 <div class="py-12">
+
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
@@ -8,13 +9,20 @@
                 <p class="text-gray-600 mt-1">Trainings, meetings, and hospital events</p>
             </div>
             @if(auth()->user()->isAdmin() || auth()->user()->isHOD())
-                <a href="{{ route('events.create') }}" 
+                <a href="{{ route('events.create') }}"
                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
                     Create Event
                 </a>
+                <a href="{{ route('events.index') }}" class="block">
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
+        <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📅</div>
+        <h3 class="font-semibold text-gray-800 text-sm">Events</h3>
+        <p class="text-xs text-gray-500 mt-1">Trainings</p>
+    </div>
+</a>
             @endif
         </div>
 
@@ -63,21 +71,21 @@
         <div class="bg-white rounded-lg shadow mb-6 p-4">
             <div class="flex flex-wrap justify-between gap-4">
                 <div class="flex gap-2">
-                    <button wire:click="$set('viewMode', 'list')" 
-                            class="px-4 py-2 rounded-lg transition {{ $viewMode === 'list' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                        📋 List View
-                    </button>
-                    <button wire:click="$set('viewMode', 'calendar')" 
-                            class="px-4 py-2 rounded-lg transition {{ $viewMode === 'calendar' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                        📅 Calendar View
-                    </button>
+                    <a href="{{ route('events.index') }}"
+               class="px-4 py-2 rounded-lg transition {{ request()->routeIs('events.index') ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                📋 List View
+            </a>
+                   <a href="{{ route('events.calendar') }}"
+               class="px-4 py-2 rounded-lg transition {{ request()->routeIs('events.calendar') ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                📅 Calendar View
+            </a>
                 </div>
-                
+
                 <div class="flex flex-wrap gap-3">
                     <div class="min-w-[200px]">
-                        <input type="text" 
-                               wire:model.live.debounce.300ms="search" 
-                               placeholder="Search events..." 
+                        <input type="text"
+                               wire:model.live.debounce.300ms="search"
+                               placeholder="Search events..."
                                class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500">
                     </div>
                     <div>
@@ -113,7 +121,7 @@
                                     </span>
                                     <h3 class="text-xl font-bold text-gray-800">{{ $event->title }}</h3>
                                 </div>
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                                     <div class="flex items-center gap-2 text-sm text-gray-600">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,9 +139,9 @@
                                         <span>{{ $event->venue }}</span>
                                     </div>
                                 </div>
-                                
+
                                 <p class="text-gray-600 mt-3">{{ Str::limit($event->description, 150) }}</p>
-                                
+
                                 <div class="flex flex-wrap items-center gap-3 mt-4">
                                     <span class="text-xs text-gray-500">
                                         Organized by: {{ $event->organizer->name }}
@@ -150,26 +158,14 @@
                                     @endif
                                 </div>
                             </div>
-                            
+
                             <div class="flex flex-col gap-2">
-                                <a href="{{ route('events.show', $event) }}" 
+                                <a href="{{ route('events.show', $event) }}"
                                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition text-center">
                                     View Details
                                 </a>
-                                
-                                @if($event->requires_registration && !$event->registrations()->where('user_id', auth()->id())->exists())
-                                    <button wire:click="registerForEvent({{ $event->id }})"
-                                            wire:confirm="Register for this event?"
-                                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
-                                        Register Now
-                                    </button>
-                                @endif
-                                
-                                @if($event->registrations()->where('user_id', auth()->id())->exists())
-                                    <span class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm text-center">
-                                        ✓ Registered
-                                    </span>
-                                @endif
+
+
                             </div>
                         </div>
                     </div>
@@ -197,7 +193,7 @@
                     <div class="text-6xl mb-4">📅</div>
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Calendar View Coming Soon</h3>
                     <p class="text-gray-500">Interactive calendar view is under development</p>
-                    <button wire:click="$set('viewMode', 'list')" 
+                    <button wire:click="$set('viewMode', 'list')"
                             class="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg">
                         Switch to List View
                     </button>

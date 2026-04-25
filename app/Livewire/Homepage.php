@@ -134,27 +134,27 @@ class Homepage extends Component
 {
     $user = auth()->user();
     $actions = [];
-    
+
     if ($user->canCreateMemos()) {
         $actions[] = ['name' => 'Create Memo', 'icon' => '📄', 'route' => 'memos.create', 'color' => 'blue'];
     }
-    
+
     if ($user->isAdmin()) {
         $actions[] = ['name' => 'Post News', 'icon' => '📰', 'route' => 'news.create', 'color' => 'green'];
         $actions[] = ['name' => 'Add Staff', 'icon' => '👥', 'route' => 'admin.staff.create', 'color' => 'purple'];
         $actions[] = ['name' => 'Upload Document', 'icon' => '📚', 'route' => 'documents.create', 'color' => 'orange'];
         $actions[] = ['name' => 'Manage Departments', 'icon' => '🏢', 'route' => 'admin.departments', 'color' => 'indigo'];
     }
-    
+
     if ($user->isHOD()) {
         $actions[] = ['name' => 'View Staff', 'icon' => '👥', 'route' => 'hod.staff', 'color' => 'purple'];
         $actions[] = ['name' => 'Dept Reports', 'icon' => '📊', 'route' => 'hod.reports', 'color' => 'orange'];
     }
-    
+
     if ($this->unreadMemosCount > 0) {
         $actions[] = ['name' => 'Acknowledge Memos', 'icon' => '✅', 'route' => 'memos.pending', 'color' => 'red'];
     }
-    
+
     return $actions;
 }
 

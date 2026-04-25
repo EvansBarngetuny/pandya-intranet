@@ -16,6 +16,8 @@ class Memo extends Model
         'attachments', 'status', 'published_at', 'expires_at'
     ];
      protected $casts = [
+        'effective_date' => 'datetime',  // Change from 'date' to 'datetime'
+        'expiry_date' => 'datetime',
         'audience_ids' => 'array',
         'attachments' => 'array',
         'published_at' => 'datetime',

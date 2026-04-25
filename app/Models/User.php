@@ -30,10 +30,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name', 'email', 'password', 'staff_number', 'department_id',
+        'name',
+        'email',
+        'password',
+        'staff_number', 'department_id',
         'role', 'phone', 'profile_photo', 'position', 'is_active',
         'hire_date', 'permissions'
-            ];
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -46,13 +49,11 @@ class User extends Authenticatable
         'two_factor_recovery_codes',
         'two_factor_secret',
     ];
-
      protected $casts = [
         'is_active' => 'boolean',
         'hire_date' => 'date',
         'permissions' => 'array'
     ];
-
     /**
      * The accessors to append to the model's array form.
      *
@@ -74,47 +75,51 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function readMemos()
-{
-    return $this->belongsToMany(Memo::class, 'memo_reads')
-        ->withPivot('read_at')
-        ->withTimestamps();
-}
-// Role checks
-public function isAdmin() { return $this->role === 'admin'; }
-public function isHOD() { return $this->role === 'hod'; }
-public function isStaff() { return $this->role === 'staff'; }
-// Permission checks
+     public function isAdmin() { return $this->role === 'admin'; }
+    public function isHOD() { return $this->role === 'hod'; }
+    public function isStaff() { return $this->role === 'staff'; }
+
+    // Permission checks
     public function canCreateMemos()
     {
         return in_array($this->role, ['admin', 'hod']);
     }
+
     public function canPublishNews()
     {
         return in_array($this->role, ['admin']);
     }
-     public function canManageStaff()
+
+    public function canManageStaff()
     {
         return in_array($this->role, ['admin']);
     }
+
     public function canViewReports()
     {
         return in_array($this->role, ['admin', 'hod']);
     }
-      // Relationships
+
+    // Relationships
     public function department()
     {
         return $this->belongsTo(Department::class);
     }
-     public function createdMemos()
+
+    public function createdMemos()
     {
         return $this->hasMany(Memo::class, 'created_by');
     }
-       public function memoAcknowledgments()
+
+    public function memoAcknowledgments()
     {
         return $this->hasMany(MemoAcknowledgment::class);
     }
-       public function unreadMemos()
+
+    /**
+     * Get unread memos for the user (memos that haven't been acknowledged)
+     */
+    public function unreadMemos()
     {
         return Memo::where('status', 'published')
             ->whereDoesntHave('acknowledgments', function($q) {
@@ -132,11 +137,22 @@ public function isStaff() { return $this->role === 'staff'; }
                     });
             })->get();
     }
+
+    /**
+     * Get unread memos count (alternative method)
+     */
+    public function getUnreadMemosCount()
+    {
+        return $this->unreadMemos()->count();
+    }
+
     public function unreadNotifications()
     {
         return $this->hasMany(Notification::class)->where('is_read', false);
     }
-     public function getProfilePhotoUrlAttribute()
+
+    // Accessor for profile photo
+    public function getProfilePhotoUrlAttribute()
     {
         if ($this->profile_photo) {
             return asset('storage/' . $this->profile_photo);
