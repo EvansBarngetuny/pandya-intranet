@@ -79,20 +79,30 @@ class CreateMemo extends Component
     public function saveAsDraft()
     {
         $this->validate();
+        try{
         $this->saveMemo('draft');
         session()->flash('message', 'Memo saved as draft successfully!');
         return redirect()->route('memos.index');
+        }catch (\Exception $e) {
+            session()->flash('error','Error Saving Memo: ' . $e->getMessage());
+            return null;
+        }
     }
 
-    public function publish()
-    {
-        $this->validate();
-        $this->saveMemo('published');
-        session()->flash('message', 'Memo published successfully!');
-        return redirect()->route('memos.index');
-    }
-    protected function saveMemo($status)
+public function submitForApproval()
 {
+    $this->validate();
+    try{
+        $memo = $this->saveMemo('pending_approval'); // Change from 'Pending_approval' to 'pending_approval'
+        session()->flash('message', 'Memo submitted for approval! Admin will review and publish!');
+        return redirect()->route('memos.index');
+    } catch(\Exception $e) {
+        session()->flash('error', 'Error submitting memo: ' . $e->getMessage());
+        return null;
+    }
+}
+    protected function saveMemo($status)
+    {
     // Save attachments
     $savedAttachments = [];
     foreach ($this->attachments as $attachment) {
@@ -106,7 +116,12 @@ class CreateMemo extends Component
     }
 
     // Prepare recipients array
-    $recipients = $this->prepareRecipients();
+    $recipients = [];
+    if ($this->recipient_type === 'departments') {
+        $recipients = $this->selected_departments;
+    } elseif ($this->recipient_type === 'specific_users') {
+        $recipients = $this->selected_users;
+    }
 
     // Create memo with ALL required fields
     $memo = Memo::create([
@@ -126,6 +141,10 @@ class CreateMemo extends Component
         'audience_ids' => $recipients,
         'published_at' => $status === 'published' ? now() : null,
     ]);
+      if ($status === 'published') {
+        $memoData['published_at'] = now();
+        $memoData['published_by'] = auth()->id();
+    }
 
     return $memo;
 }
@@ -148,6 +167,56 @@ class CreateMemo extends Component
 
         return $recipients;
     }
+  // Department selection helpers
+   // Add these methods to app/Livewire/Memos/CreateMemo.php
+
+// Department selection helpers
+public function selectAllDepartments()
+{
+    $this->selected_departments = Department::pluck('id')->toArray();
+}
+
+public function deselectAllDepartments()
+{
+    $this->selected_departments = [];
+}
+
+public function removeDepartment($deptId)
+{
+    $this->selected_departments = array_filter($this->selected_departments, function($id) use ($deptId) {
+        return $id != $deptId;
+    });
+    $this->selected_departments = array_values($this->selected_departments);
+}
+
+// User selection helpers
+public function selectAllUsers()
+{
+    $this->selected_users = User::pluck('id')->toArray();
+}
+
+public function selectAllHODs()
+{
+    $this->selected_users = User::where('role', 'hod')->pluck('id')->toArray();
+}
+
+public function selectAllAdmins()
+{
+    $this->selected_users = User::where('role', 'admin')->pluck('id')->toArray();
+}
+
+public function deselectAllUsers()
+{
+    $this->selected_users = [];
+}
+
+public function removeUser($userId)
+{
+    $this->selected_users = array_filter($this->selected_users, function($id) use ($userId) {
+        return $id != $userId;
+    });
+    $this->selected_users = array_values($this->selected_users);
+}
 
     public function render()
     {
