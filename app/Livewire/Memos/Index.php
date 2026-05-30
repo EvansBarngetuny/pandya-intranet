@@ -3,6 +3,7 @@
 namespace App\Livewire\Memos;
 
 use App\Models\Department;
+use App\Traits\LogsActivity;
 use App\Models\Memo;
 use App\Models\User;
 use Livewire\Component;
@@ -10,6 +11,7 @@ use Livewire\WithPagination;
 
 class Index extends Component
 {
+    use LogsActivity;
     use WithPagination;
 
     public $search = '';
@@ -140,6 +142,8 @@ class Index extends Component
             'approved_by' => auth()->id(),
         ]);
 
+        $this->logActivity('approve_memo', 'memos', "Memo approved and published: {$memo->title} ({$memo->memo_number})");
+
         session()->flash('message', 'Memo approved and published successfully!');
     }
 
@@ -158,6 +162,7 @@ class Index extends Component
             'approved_by' => auth()->id(),
         ]);
 
+        $this->logActivity('reject_memo', 'memos', "Memo rejected: {$memo->title} ({$memo->memo_number})");
         session()->flash('message', 'Memo rejected successfully!');
     }
 

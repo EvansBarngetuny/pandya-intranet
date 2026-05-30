@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\Memo;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -119,5 +121,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('reject-memo', function (?User $user = null) {
             return $user && $user->isAdmin();
         });
+         // Set UTF-8 for database connection
+        DB::statement('SET NAMES utf8mb4');
+        
+        // Set default string length for older MySQL
+        Schema::defaultStringLength(191);
+        
+        // Set locale for Carbon
+        setlocale(LC_TIME, 'en_US.UTF-8');
     }
 }

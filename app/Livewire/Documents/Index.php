@@ -29,7 +29,7 @@ class Index extends Component
         $document = Document::findOrFail($id);
         
         // Increment download count
-        $document->increment('download_count');
+        $document->incrementDownloadCount();
         
         // Log download activity
         \App\Models\ActivityLog::create([
@@ -40,7 +40,13 @@ class Index extends Component
             'ip_address' => request()->ip(),
         ]);
         
-        return response()->download(storage_path('app/public/' . $document->file_path), $document->file_name);
+        $filePath = storage_path('app/public/' . $document->file_path);
+    if (!file_exists($filePath)) {
+        session()->flash('error', 'File not found.');
+        return null;
+    }
+    
+    return response()->download($filePath, $document->file_name);
     }
 
     public function deleteDocument($id)

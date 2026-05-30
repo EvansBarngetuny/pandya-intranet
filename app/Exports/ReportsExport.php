@@ -11,11 +11,13 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles
 {
     protected $data;
     protected $headings;
+    protected $title;
     
     public function __construct($data, $headings)
     {
         $this->data = $data;
         $this->headings = $headings;
+        $this->title = $title;
     }
     
     public function array(): array
@@ -25,7 +27,10 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles
     
     public function headings(): array
     {
-        return $this->headings;
+        if ($this->data->isEmpty()) {
+            return ['No data available'];
+        }
+        return array_keys($this->data->first());
     }
     
     public function styles(Worksheet $sheet)
@@ -33,5 +38,9 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles
         return [
             1 => ['font' => ['bold' => true, 'size' => 12]],
         ];
+    }
+     public function title(): string
+    {
+        return $this->title;
     }
 }

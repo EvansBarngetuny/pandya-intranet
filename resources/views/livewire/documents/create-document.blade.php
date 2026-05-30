@@ -24,8 +24,8 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Document Title <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               wire:model="title" 
+                        <input type="text"
+                               wire:model="title"
                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                placeholder="Enter document title">
                         @error('title') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -49,7 +49,7 @@
                     <!-- Description -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea wire:model="description" rows="3" 
+                        <textarea wire:model="description" rows="3"
                                   class="w-full rounded-lg border-gray-300"
                                   placeholder="Brief description of the document"></textarea>
                     </div>
@@ -91,11 +91,20 @@
                             <input type="number" wire:model="version" min="1" class="w-full rounded-lg border-gray-300">
                             @error('version') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Effective Date</label>
                             <input type="date" wire:model="effective_date" class="w-full rounded-lg border-gray-300">
                         </div>
+                    </div>
+
+                    <!-- Require Acknowledgment - ADD THIS SECTION -->
+                    <div class="border-t pt-4">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" wire:model="require_acknowledgment" class="form-checkbox text-blue-600 rounded">
+                            <span class="ml-2 text-sm text-gray-700">✓ Require acknowledgment of receipt (Digital Signature)</span>
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1 ml-6">Staff will need to digitally sign that they have read this document</p>
                     </div>
 
                     <!-- Status -->
@@ -108,11 +117,11 @@
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-4 border-t">
-                        <a href="{{ route('documents.index') }}" 
+                        <a href="{{ route('documents.index') }}"
                            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
                             Cancel
                         </a>
-                        <button type="submit" 
+                        <button type="submit"
                                 class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                             Upload Document
                         </button>

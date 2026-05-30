@@ -17,6 +17,7 @@ class CreateDocument extends Component
     public $version = 1;
     public $effective_date;
     public $is_active = true;
+    public $require_acknowledgment = false;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -25,6 +26,7 @@ class CreateDocument extends Component
         'file' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         'version' => 'required|integer|min:1',
         'effective_date' => 'nullable|date',
+        'require_acknowledgment' => 'boolean',
     ];
 
     protected $messages = [
@@ -55,6 +57,7 @@ class CreateDocument extends Component
             'effective_date' => $this->effective_date,
             'is_active' => $this->is_active, // REQUIRED (default 1)
             'accessible_roles' => null, // Optional
+            'require_acknowledgment' => $this->require_acknowledgment, // REQUIRED (default 0)
         ]);
 
         session()->flash('message', 'Document uploaded successfully!');

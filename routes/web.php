@@ -15,8 +15,6 @@ use App\Livewire\Events\ShowEvent;
 use App\Livewire\Documents\Index as DocumentIndex;
 use App\Livewire\Documents\CreateDocument;
 use App\Livewire\Documents\ShowDocument;
-use App\Livewire\Profile\ShowProfile;
-use App\Livewire\Profile\EditProfile;
 
 // Guest routes
 Route::middleware('guest')->group(function () {
@@ -67,12 +65,6 @@ Route::middleware([
         Route::get('/{document}', ShowDocument::class)->name('show');
     });
 
-    // Profile routes
-    //Route::prefix('profile')->name('profile.')->group(function () {
-      //  Route::get('/', ShowProfile::class)->name('show');
-        //Route::get('/edit', EditProfile::class)->name('edit');
-    //});
-
     // Reports redirect route
     Route::get('/reports', function () {
         $user = auth()->user();
@@ -97,7 +89,6 @@ Route::middleware([
         Route::get('/staff', \App\Livewire\Admin\StaffIndex::class)->name('staff.index');
         Route::get('/staff/create', \App\Livewire\Admin\CreateStaff::class)->name('staff.create');
         Route::get('/staff/{user}', \App\Livewire\Admin\EditStaff::class)->name('staff.edit');
-        //Route::get('/staff/{user}/show', \App\Livewire\Admin\StaffShow::class)->name('staff.show');
         Route::get('/reports', \App\Livewire\Admin\Reports::class)->name('reports');
         Route::get('/departments', \App\Livewire\Admin\Departments::class)->name('departments');
         Route::get('/settings', \App\Livewire\Admin\Settings::class)->name('settings');
@@ -109,15 +100,19 @@ Route::middleware([
         Route::get('/department-staff/{user}', \App\Livewire\Hod\StaffShow::class)->name('staff.show');
         Route::get('/dept-reports', \App\Livewire\Hod\DepartmentReports::class)->name('reports');
     });
+    // routes/web.php - Add this in admin routes section
+Route::get('/activity-logs', \App\Livewire\Admin\ActivityLogs::class)->name('activity-logs');
 
-    // Logout - Jetstream handles this, but keep for reference
-    Route::post('/logout', function () {
-        auth()->logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-        return redirect('/login');
-    })->name('logout');
+    // REMOVE THIS CUSTOM LOGOUT ROUTE - Jetstream already has one
+    // Route::post('/logout', function () {
+    //     auth()->logout();
+    //     request()->session()->invalidate();
+    //     request()->session()->regenerateToken();
+    //     return redirect('/login');
+    // })->name('logout');
 });
+
+// Dashboard route
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),

@@ -8,7 +8,7 @@
                 <p class="text-gray-600 mt-1">Access hospital policies, SOPs, and forms</p>
             </div>
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('documents.create') }}" 
+                <a href="{{ route('documents.create') }}"
                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -34,9 +34,9 @@
         <div class="bg-white rounded-lg shadow mb-6 p-4">
             <div class="flex flex-wrap gap-4">
                 <div class="flex-1 min-w-[200px]">
-                    <input type="text" 
-                           wire:model.live.debounce.300ms="search" 
-                           placeholder="Search documents..." 
+                    <input type="text"
+                           wire:model.live.debounce.300ms="search"
+                           placeholder="Search documents..."
                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                 </div>
                 <div>
@@ -78,22 +78,27 @@
                                 </button>
                             @endif
                         </div>
-                        
+                        <div class="text-xs text-gray-500 uppercase mb-1">
+                         @if($doc->require_acknowledgment)
+    <span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Requires Acknowledgment</span>
+@endif
+                        </div>
+
                         <h3 class="text-lg font-bold text-gray-800 mb-1">{{ $doc->title }}</h3>
                         <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ $doc->description ?? 'No description' }}</p>
-                        
+
                         <div class="flex items-center justify-between text-xs text-gray-500 mb-4">
                             <span>Version {{ $doc->version }}</span>
                             <span>{{ $doc->file_size }}</span>
                             <span>📥 {{ $doc->download_count }}</span>
                         </div>
-                        
+
                         <div class="flex gap-2">
                             <button wire:click="download({{ $doc->id }})"
                                     class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm transition text-center">
                                 Download
                             </button>
-                            <a href="{{ route('documents.show', $doc) }}" 
+                            <a href="{{ route('documents.show', $doc) }}"
                                class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm transition text-center">
                                 View Details
                             </a>

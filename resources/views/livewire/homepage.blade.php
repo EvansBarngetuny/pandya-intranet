@@ -171,7 +171,7 @@
                 @endforeach
             </div>
         </div>
-        @endif 
+        @endif
 
         <!-- Applications Section -->
         <div class="mb-10">
@@ -306,7 +306,7 @@
             <!-- ROW 3: Admin Only Applications -->
             @if(auth()->user()->isAdmin())
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                <a href="#" class="block">
+                <a href="{{ route('activity-logs') }}" class="block">
                     <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
                         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">🔐</div>
                         <h3 class="font-semibold text-gray-800 text-sm">Audit Logs</h3>

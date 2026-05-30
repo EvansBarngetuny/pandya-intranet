@@ -3,6 +3,7 @@
 namespace App\Livewire\Memos;
 
 use Livewire\Component;
+use App\Traits\LogsActivity;
 use Livewire\WithFileUploads;
 use App\Models\Memo;
 use App\Models\Department;
@@ -11,7 +12,9 @@ use Illuminate\Support\Str;
 
 class CreateMemo extends Component
 {
+    use LogsActivity;
     use WithFileUploads;
+
 
     public $memo_number;
     public $title;
@@ -93,7 +96,8 @@ public function submitForApproval()
 {
     $this->validate();
     try{
-        $memo = $this->saveMemo('pending_approval'); // Change from 'Pending_approval' to 'pending_approval'
+        $memo = $this->saveMemo('pending_approval');
+        $this->logActivity('submit_for_approval', 'memos', "Memo submitted for approval: {$memo->title}");
         session()->flash('message', 'Memo submitted for approval! Admin will review and publish!');
         return redirect()->route('memos.index');
     } catch(\Exception $e) {
