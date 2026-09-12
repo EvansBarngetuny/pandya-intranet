@@ -77,13 +77,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libicu-dev \
     libzip-dev \
     libfreetype6 \
-    libjpeg62-turbo \
+    libjpeg62-turbo-dev \
     libpng-dev \
     libxml2-dev \
     libonig-dev \
     && docker-php-ext-configure gd \
         --with-freetype \
-        --with-jpeg \
+        --with-jpeg=/usr \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         pdo_pgsql \
