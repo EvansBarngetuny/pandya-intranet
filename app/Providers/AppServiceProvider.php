@@ -6,6 +6,7 @@ use App\Models\Memo;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 
