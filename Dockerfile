@@ -80,12 +80,12 @@ RUN ls -la public/build/ && ls -la public/build/assets/ | head -20
 
 
 # =========================================================
-# Stage 3: Production (Final image)
 # =========================================================
-FROM php:8.4-cli
+# Stage 3: Production (Final image with FrankenPHP)
+# =========================================================
+FROM dunglas/frankenphp:php8.4 AS production
 
-ENV PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig
-
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libicu-dev \
@@ -95,10 +95,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libxml2-dev \
     libonig-dev \
-    && docker-php-ext-configure gd \
-        --with-freetype \
-        --with-jpeg=/usr \
-    && docker-php-ext-install -j$(nproc) \
+    && install-php-extensions \
         pdo_mysql \
         pdo_pgsql \
         pgsql \
@@ -108,52 +105,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bcmath \
         gd \
         xml \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+        redis \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+WORKDIR /app
 
-WORKDIR /var/www/html
-
-# Copy application with all dependencies from builder
 COPY --from=php-builder /var/www/html .
 
-# Copy compiled frontend assets from the frontend stage
 COPY --from=frontend /var/www/html/public/build ./public/build
 
-# Create Laravel's writable directories
 RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
     bootstrap/cache
 
-# Set correct ownership
-RUN chown -R www-data:www-data \
-    storage \
-    bootstrap/cache \
-    public/build
-
-USER www-data
+RUN chown -R www-data:www-data storage bootstrap/cache public/build
 
 EXPOSE 8000
 
-# Startup sequence:
-# 1. Discover packages (needs real env)
-# 2. Cache config/routes/views (uses real env)
-# 3. Run migrations + seeders (database is now reachable)
-# 4. Start PHP server
 CMD ["sh", "-c", "\
-    echo '=== [1/4] Discovering packages ===' && \
-    php artisan package:discover --ansi && \
-    echo '=== [2/4] Caching config, routes, views ===' && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
-    echo '=== [3/4] Running migrations + seeders ===' && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
-    echo '=== [4/4] Starting server on port ${PORT:-8000} ===' && \
-    exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+    frankenphp php-server --listen :${PORT:-8000} --root public/"]
