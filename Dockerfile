@@ -36,13 +36,10 @@ WORKDIR /var/www/html
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy the ENTIRE application first
 COPY . .
 
-# Create a temporary .env so Artisan commands can run during build
 RUN cp .env.example .env || true
 
-# Install PHP dependencies
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --no-dev \
     --optimize-autoloader \
@@ -71,6 +68,9 @@ RUN npm run build
 # Stage 3: Production
 # =========================================================
 FROM php:8.3-cli
+
+# ✅ FIX: Tell pkg-config where to find libjpeg.pc in Debian Trixie
+ENV PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
