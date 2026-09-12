@@ -1,7 +1,7 @@
 # =========================================================
-# Stage 1: PHP dependencies + PHP extensions
+# Stage 1: PHP builder
 # =========================================================
-FROM php:8.3-cli AS php-builder
+FROM php:8.4-cli AS php-builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -37,13 +37,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 # =========================================================
-# Install Composer
+# Composer
 # =========================================================
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 
 # =========================================================
-# Application
+# Laravel application
 # =========================================================
 WORKDIR /var/www/html
 
@@ -51,13 +51,13 @@ COPY . .
 
 
 # =========================================================
-# Laravel environment
+# Environment
 # =========================================================
 RUN cp .env.example .env
 
 
 # =========================================================
-# Install PHP dependencies
+# PHP dependencies
 # =========================================================
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --no-dev \
@@ -68,31 +68,29 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
 
 
 # =========================================================
-# Stage 2: Frontend build
+# Stage 2: Frontend
 # =========================================================
 FROM node:22-alpine AS frontend
 
 WORKDIR /var/www/html
 
-# Copy package files first for Docker layer caching
 COPY package.json package-lock.json ./
 
 RUN npm ci
 
-# Copy application source
 COPY . .
 
-# Build Vite assets
 RUN npm run build
 
 
 # =========================================================
 # Stage 3: Production
 # =========================================================
-FROM php:8.3-cli
+FROM php:8.4-cli
+
 
 # =========================================================
-# Runtime libraries ONLY
+# Runtime libraries
 # =========================================================
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
@@ -108,46 +106,49 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 # =========================================================
-# Copy PHP extensions from builder
+# Copy compiled PHP extensions
 # =========================================================
-
-COPY --from=php-builder /usr/local/lib/php/extensions/ \
+COPY --from=php-builder \
+    /usr/local/lib/php/extensions/ \
     /usr/local/lib/php/extensions/
 
-COPY --from=php-builder /usr/local/etc/php/conf.d/ \
+
+# =========================================================
+# Copy PHP configuration / enabled extensions
+# =========================================================
+COPY --from=php-builder \
+    /usr/local/etc/php/conf.d/ \
     /usr/local/etc/php/conf.d/
 
 
 # =========================================================
-# PHP configuration
+# PHP production configuration
 # =========================================================
-
 RUN mv "$PHP_INI_DIR/php.ini-production" \
     "$PHP_INI_DIR/php.ini"
 
 
 # =========================================================
-# Application
+# Laravel application
 # =========================================================
-
 WORKDIR /var/www/html
 
-COPY --from=php-builder /var/www/html .
+COPY --from=php-builder \
+    /var/www/html \
+    .
 
 
 # =========================================================
-# Copy compiled Vite assets
+# Vite production assets
 # =========================================================
-
 COPY --from=frontend \
     /var/www/html/public/build \
     ./public/build
 
 
 # =========================================================
-# Laravel storage directories
+# Laravel directories
 # =========================================================
-
 RUN mkdir -p \
     storage/framework/cache \
     storage/framework/sessions \
@@ -159,28 +160,24 @@ RUN mkdir -p \
 # =========================================================
 # Permissions
 # =========================================================
-
 RUN chown -R www-data:www-data \
     storage \
     bootstrap/cache
 
 
 # =========================================================
-# Run as Laravel user
+# Run as www-data
 # =========================================================
-
 USER www-data
 
 
 # =========================================================
-# Port
+# Application port
 # =========================================================
-
 EXPOSE 8000
 
 
 # =========================================================
-# Laravel production startup
+# Laravel startup
 # =========================================================
-
 CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
