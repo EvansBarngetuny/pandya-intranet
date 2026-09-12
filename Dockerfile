@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zip \
         bcmath \
         gd \
+        xml \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apt-get clean \
@@ -35,16 +36,19 @@ WORKDIR /var/www/html
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY composer.json composer.lock ./
+# Copy the ENTIRE application first
+COPY . .
 
+# Create a temporary .env so Artisan commands can run during build
+RUN cp .env.example .env || true
+
+# Install PHP dependencies
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
     --no-progress \
     --prefer-dist
-
-COPY . .
 
 
 # =========================================================
@@ -74,7 +78,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     libfreetype6 \
     libjpeg62-turbo \
-    libpng16-16 \
+    libpng-dev \
+    libxml2-dev \
+    libonig-dev \
     && docker-php-ext-configure gd \
         --with-freetype \
         --with-jpeg \
@@ -87,6 +93,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zip \
         bcmath \
         gd \
+        xml \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apt-get clean \
@@ -114,8 +121,8 @@ USER www-data
 
 EXPOSE 8000
 
-CMD php artisan migrate --force && \
-    php artisan config:cache && \
+CMD php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
+    php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
