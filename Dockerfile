@@ -3,6 +3,9 @@
 # =========================================================
 FROM php:8.3-cli AS php-builder
 
+# ✅ FIX: Set PKG_CONFIG_PATH for libjpeg.pc discovery
+ENV PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
@@ -69,7 +72,7 @@ RUN npm run build
 # =========================================================
 FROM php:8.3-cli
 
-# ✅ FIX: Tell pkg-config where to find libjpeg.pc in Debian Trixie
+# ✅ FIX: Set PKG_CONFIG_PATH for libjpeg.pc discovery
 ENV PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
