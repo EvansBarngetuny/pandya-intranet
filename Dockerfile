@@ -129,5 +129,4 @@ CMD ["sh", "-c", "\
     php artisan route:cache && \
     php artisan view:cache && \
     php artisan migrate --force && \
-    php artisan db:seed --force && \
     frankenphp php-server --listen :${PORT:-8000} --root public/"]
