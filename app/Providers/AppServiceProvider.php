@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+       //
     }
 
     /**
@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        //Force HTTPS in production
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
         // Gate for creating memos (only HOD and Admin)
       Gate::define('create-memo', function (?User $user = null) {
             if (!$user) return false;
@@ -130,4 +134,5 @@ class AppServiceProvider extends ServiceProvider
         // Set locale for Carbon
         setlocale(LC_TIME, 'en_US.UTF-8');
     }
+     
 }
