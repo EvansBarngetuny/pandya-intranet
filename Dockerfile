@@ -1,10 +1,9 @@
-# =========================================
-# Stage 1: Build Environment (Builder)
-# =========================================
-FROM php:8.4-fpm AS builder
+# =========================================================
+# Stage 1: PHP dependencies
+# =========================================================
+FROM php:8.3-cli AS builder
 
-# Install system dependencies required for Laravel and Composer
-# Includes git and unzip to resolve your previous build failures
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
@@ -16,64 +15,118 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     libicu-dev \
     libzip-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-    pdo_mysql \
-    pdo_pgsql \
-    pgsql \
-    opcache \
-    intl \
-    zip \
-    bcmath \
+        pdo_mysql \
+        pdo_pgsql \
+        pgsql \
+        opcache \
+        intl \
+        zip \
+        bcmath \
+        gd \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /var/www
+# Working directory
+WORKDIR /var/www/html
 
-# Copy the entire application code
-COPY . /var/www
+# Copy application
+COPY . .
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install application dependencies
-RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+# Install PHP dependencies
+RUN COMPOSER_ALLOW_SUPERUSER=1 \
+    composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --no-progress \
+    --prefer-dist
 
-# =========================================
-# Stage 2: Production Environment (Runtime)
-# =========================================
-FROM php:8.3-fpm
 
-# Install only the runtime libraries needed for the production environment
+# =========================================================
+# Stage 2: Frontend build
+# =========================================================
+FROM node:22-alpine AS frontend
+
+WORKDIR /var/www/html
+
+# Copy package files first for Docker cache
+COPY package*.json ./
+
+# Install Node dependencies
+RUN npm ci
+
+# Copy frontend source files
+COPY . .
+
+# Build Vite assets
+RUN npm run build
+
+
+# =========================================================
+# Stage 3: Production
+# =========================================================
+FROM php:8.3-cli
+
+# Runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libicu-dev \
     libzip-dev \
-    libfcgi-bin \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng16-16 \
     procps \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install \
+        pdo_mysql \
+        pdo_pgsql \
+        pgsql \
+        opcache \
+        intl \
+        zip \
+        bcmath \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the compiled PHP extensions and config from the builder stage
-COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
-COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-COPY --from=builder /usr/local/bin/docker-php-ext-* /usr/local/bin/
-
-# Apply the recommended production PHP settings
+# PHP production configuration
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Copy the application files and vendor directory from the builder
-COPY --from=builder /var/www /var/www
+# Working directory
+WORKDIR /var/www/html
 
-# Set working directory
-WORKDIR /var/www
+# Copy Laravel application from builder
+COPY --from=builder /var/www/html /var/www/html
 
-# Ensure correct permissions for Laravel's storage and cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Copy compiled Vite assets
+COPY --from=frontend /var/www/html/public/build /var/www/html/public/build
 
-# Switch to the non-privileged user
+# Laravel permissions
+RUN chown -R www-data:www-data \
+    storage \
+    bootstrap/cache
+
+# Use non-root user
 USER www-data
 
-# Expose port 9000 and start PHP-FPM
-EXPOSE 9000
-CMD ["php-fpm"]
+# Railway will provide the PORT environment variable
+EXPOSE 8000
+
+# Start Laravel
+CMD php artisan migrate --force \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache \
+    && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
