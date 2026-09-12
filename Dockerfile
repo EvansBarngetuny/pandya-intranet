@@ -1,13 +1,14 @@
 # =========================================================
-# Stage 1: PHP builder
+# Stage 1: PHP dependencies (Builder)
 # =========================================================
-FROM php:8.4-cli AS php-builder
+FROM php:8.3-cli AS php-builder
 
-# Install build dependencies
+# Fix: Tell pkg-config where to find .pc files in Debian Trixie
+ENV PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
-    pkg-config \
     libpq-dev \
     libonig-dev \
     libxml2-dev \
@@ -16,11 +17,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
-    $PHPIZE_DEPS \
     && docker-php-ext-configure gd \
         --with-freetype \
-        --with-jpeg \
-    && docker-php-ext-install -j2 \
+        --with-jpeg=/usr \
+    && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         pdo_pgsql \
         pgsql \
@@ -35,30 +35,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
-# =========================================================
-# Composer
-# =========================================================
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-
-# =========================================================
-# Laravel application
-# =========================================================
 WORKDIR /var/www/html
 
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copy the entire application first so artisan scripts work
 COPY . .
 
+# Create a temporary .env so Composer's post-autoload scripts can run
+RUN cp .env.example .env || true
 
-# =========================================================
-# Environment
-# =========================================================
-RUN cp .env.example .env
+# Remove dev-only config files that reference classes not present with --no-dev
+# Scribe is a dev-only package; its config references classes that break package:discover
+RUN rm -f config/scribe.php || true
 
-
-# =========================================================
-# PHP dependencies
-# =========================================================
+# Install PHP dependencies
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --no-dev \
     --optimize-autoloader \
@@ -68,13 +59,13 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
 
 
 # =========================================================
-# Stage 2: Frontend
+# Stage 2: Frontend (Vite build)
 # =========================================================
 FROM node:22-alpine AS frontend
 
 WORKDIR /var/www/html
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 RUN npm ci
 
@@ -84,100 +75,67 @@ RUN npm run build
 
 
 # =========================================================
-# Stage 3: Production
+# Stage 3: Production (Final image)
 # =========================================================
-FROM php:8.4-cli
+FROM php:8.3-cli
 
+# Fix: Tell pkg-config where to find .pc files in Debian Trixie
+ENV PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig
 
-# =========================================================
-# Runtime libraries
-# =========================================================
+# Fix: Use -dev packages so pkg-config can find libjpeg and freetype2
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    libicu76 \
-    libzip5 \
-    libfreetype6 \
-    libjpeg62-turbo \
-    libpng16-16t64 \
-    libxml2 \
-    libonig5 \
+    libpq-dev \
+    libicu-dev \
+    libzip-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libxml2-dev \
+    libonig-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg=/usr \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_mysql \
+        pdo_pgsql \
+        pgsql \
+        opcache \
+        intl \
+        zip \
+        bcmath \
+        gd \
+        xml \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Use production PHP settings
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# =========================================================
-# Copy compiled PHP extensions
-# =========================================================
-COPY --from=php-builder \
-    /usr/local/lib/php/extensions/ \
-    /usr/local/lib/php/extensions/
-
-
-# =========================================================
-# Copy PHP configuration / enabled extensions
-# =========================================================
-COPY --from=php-builder \
-    /usr/local/etc/php/conf.d/ \
-    /usr/local/etc/php/conf.d/
-
-
-# =========================================================
-# PHP production configuration
-# =========================================================
-RUN mv "$PHP_INI_DIR/php.ini-production" \
-    "$PHP_INI_DIR/php.ini"
-
-
-# =========================================================
-# Laravel application
-# =========================================================
 WORKDIR /var/www/html
 
-COPY --from=php-builder \
-    /var/www/html \
-    .
+# Copy the application with all installed dependencies from builder
+COPY --from=php-builder /var/www/html .
 
+# Copy the compiled frontend assets from the frontend stage
+COPY --from=frontend /var/www/html/public/build ./public/build
 
-# =========================================================
-# Vite production assets
-# =========================================================
-COPY --from=frontend \
-    /var/www/html/public/build \
-    ./public/build
-
-
-# =========================================================
-# Laravel directories
-# =========================================================
-RUN mkdir -p \
-    storage/framework/cache \
+# Ensure Laravel's writable directories exist
+RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
     bootstrap/cache
 
-
-# =========================================================
-# Permissions
-# =========================================================
+# Set correct ownership for Laravel's writable directories
 RUN chown -R www-data:www-data \
     storage \
     bootstrap/cache
 
-
-# =========================================================
-# Run as www-data
-# =========================================================
 USER www-data
 
-
-# =========================================================
-# Application port
-# =========================================================
 EXPOSE 8000
 
-
-# =========================================================
-# Laravel startup
-# =========================================================
+# Use JSON array form to prevent signal handling issues
 CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
