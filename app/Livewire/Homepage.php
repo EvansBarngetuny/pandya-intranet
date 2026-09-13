@@ -49,10 +49,8 @@ class Homepage extends Component
           #  ->limit(5)
          #   ->get();
          $this->unreadNewsCount = News::where('published_at', '<=', now())
+            ->where('published_at', '<=', now()->subDays(7))
             ->where('show_on_homepage', true)
-            ->whereDoesntHave('acknowledgments', function($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
             ->count();
 
         // Upcoming events (next 30 days)
@@ -60,17 +58,15 @@ class Homepage extends Component
           #  ->orderBy('start_datetime', 'asc')
           #  ->limit(5)
           #  ->get();
-          $this->$_COOKIEunreadEventsCount = Event::where('start_datetime', '>=', now())
-            ->whereDoesntHave('acknowledgments', function($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
+          $this->unreadEventsCount = Event::where('start_datetime', '>=', now())
+            ->where('start_datetime', '<=', now()->addDays(30))
             ->count();
             // ✅ Unacknowledged documents count (for this user)
-$this->unreadDocumentsCount = Document::where('is_active', true)
-    ->whereDoesntHave('acknowledgments', function ($q) use ($user) {
-        $q->where('user_id', $user->id);
-    })
-    ->count();
+          $this->unreadDocumentsCount = Document::where('is_active', true)
+              ->whereDoesntHave('acknowledgments', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+               })
+            ->count();
         // Recent memos for the user
         $this->recentMemos = Memo::where('status', 'published')
             ->where(function($q) use ($user) {
