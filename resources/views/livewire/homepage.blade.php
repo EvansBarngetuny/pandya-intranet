@@ -187,11 +187,11 @@
                         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📰</div>
                         <h3 class="font-semibold text-gray-800 text-sm">News</h3>
                         <p class="text-xs text-gray-500 mt-1">Announcements</p>
-                        if($unreadNewsCount > 0)
-            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {{ $unreadNewsCount }}
-            </span>
-        @endif
+                        @if($unreadNewsCount > 0)
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ $unreadNewsCount }}
+                            </span>
+                        @endif
                     </div>
                 </a>
 
@@ -216,10 +216,10 @@
                         <h3 class="font-semibold text-gray-800 text-sm">Events</h3>
                         <p class="text-xs text-gray-500 mt-1">Trainings</p>
                         @if($upcomingEventsCount > 0)
-            <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {{ $upcomingEventsCount }}
-            </span>
-        @endif
+                              <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                              {{ $upcomingEventsCount }}
+                              </span>
+                        @endif
                     </div>
                 </a>
 
@@ -230,10 +230,10 @@
                         <h3 class="font-semibold text-gray-800 text-sm">Policies</h3>
                         <p class="text-xs text-gray-500 mt-1">SOPs & Forms</p>
                         @if($unreadDocumentsCount > 0)
-            <span class="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {{ $unreadDocumentsCount }}
-            </span>
-        @endif
+                           <span class="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ $unreadDocumentsCount }}
+                           </span>
+                        @endif
                     </div>
                 </a>
 
