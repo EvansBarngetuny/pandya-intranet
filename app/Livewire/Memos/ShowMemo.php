@@ -199,11 +199,28 @@ class ShowMemo extends Component
             return null;
         }
     }
+    protected function getScopeAuditTrail()
+    {
+        $user = auth()->user();
+        $fullTrail = $this->memo->getAllUsersAuditTrail();
+
+        if ($user->isAdmin()) {
+            return $fullTrail;
+        }
+
+        if ($user->isHod()) {
+            // Filter to only users in the HOD's department
+            return collect($fullTrail)->filter(function ($record) use ($user) {
+                return $record['user']->department_id === $user->department_id;
+            })->values()->all();
+        }
+        return [];
+    }
     
     public function exportAuditTrailPDF()
     {
         try {
-            $auditTrail = $this->memo->getAllUsersAuditTrail();
+            $auditTrail = $this->getScopeAuditTrail();
 
             $data = [
                 'memo' => $this->memo,
@@ -230,11 +247,15 @@ class ShowMemo extends Component
             return null;
         }
     }
+    public function getScopedAuditTrailProperty()
+{
+    return $this->getScopedAuditTrail();
+}
 
     public function exportAuditTrailExcel()
     {
         try {
-            $auditTrail = $this->memo->getAllUsersAuditTrail();
+            $auditTrail = $this->getScopeAuditTrail();
 
             $exportData = [];
             foreach ($auditTrail as $record) {

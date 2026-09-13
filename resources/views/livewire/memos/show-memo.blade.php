@@ -303,7 +303,7 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
-                                        @forelse($memo->getAllUsersAuditTrail() as $record)
+                                        @forelse($this->scopeAuditTrail() as $record)
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $record['user']->name }}</td>
                                                 <td class="px-4 py-3 text-sm text-gray-600">{{ $record['user']->department->name ?? 'N/A' }}</td>
@@ -332,7 +332,7 @@
                             </div>
                             <div class="bg-gray-50 px-4 py-3 border-t text-xs text-gray-500">
                                 <div class="flex flex-wrap justify-between gap-2">
-                                    <span>Total Staff: <strong>{{ count($memo->getAllUsersAuditTrail()) }}</strong></span>
+                                    <span>Total Staff: <strong>{{ count($this->scopeAuditTrail()) }}</strong></span>
                                     <span>Read: <strong class="text-green-600">{{ $memo->readBy()->count() }}</strong></span>
                                     <span>Acknowledged: <strong class="text-blue-600">{{ $memo->acknowledgments()->count() }}</strong></span>
                                     <span>Completion Rate: <strong class="text-purple-600">{{ $memo->acknowledgment_percentage }}%</strong></span>

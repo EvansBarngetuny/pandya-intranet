@@ -118,7 +118,11 @@ RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
-    bootstrap/cache
+    storage/app/public/memos\
+    bootstrap/cache\
+    && php artisan storage:link\
+    && chown -R www-data:www-data /var/www/html/storage
+    && chown -R www-data:www-data storage bootstrap/cache public/storage
 
 RUN chown -R www-data:www-data storage bootstrap/cache public/build
 
@@ -127,6 +131,7 @@ EXPOSE 8000
 CMD ["sh", "-c", "\
     php artisan config:cache && \
     php artisan storage:link && \
+     php artisan package:discover --ansi && \
     php artisan route:cache && \
     php artisan view:cache && \
     php artisan migrate --force && \
