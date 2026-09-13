@@ -36,17 +36,12 @@
                                 @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                             
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Staff Number *</label>
-                                <div class="flex gap-2">
-                                    <input type="text" wire:model="staff_number" class="flex-1 rounded-lg border-gray-300" readonly>
-                                    <button type="button" wire:click="generateStaffNumber" 
-                                            class="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                                        Generate
-                                    </button>
-                                </div>
-                                @error('staff_number') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            </div>
+                           <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Staff Number *</label>
+    <input type="text" wire:model="staff_number" 
+           class="w-full rounded-lg border-gray-300">
+    @error('staff_number') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+</div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>

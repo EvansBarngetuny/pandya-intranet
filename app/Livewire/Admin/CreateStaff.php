@@ -46,22 +46,9 @@ class CreateStaff extends Component
         'password.confirmed' => 'Password confirmation does not match.',
     ];
 
-    public function generateStaffNumber()
+    public function mount()
     {
-        $year = date('Y');
-        $lastStaff = User::whereYear('created_at', $year)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if ($lastStaff && $lastStaff->staff_number) {
-            $parts = explode('/', $lastStaff->staff_number);
-            $lastNumber = intval(end($parts));
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '0001';
-        }
-
-        $this->staff_number = "STAFF/{$year}/{$newNumber}";
+        $this->hire_date = date('Y-m-d'); // Default to today's date
     }
 
     public function save()
