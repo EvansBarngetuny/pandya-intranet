@@ -90,25 +90,39 @@ class ShowDocument extends Component
 }
     public function download()
     {
-        $this->document->incrementDownloadCount();
+        $doc = $this->document;
 
+        $candidates = [
+            storage_path('app/public/' . $doc->file_path),
+            storage_path('app/' . $doc->file_path),
+            public_path('storage/' . $doc->file_path),
+            public_path($doc->file_path),
+        ];
 
+        $filePath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $filePath = $candidate;
+                break;
+            }
+        }
+        if (!$filePath) {
+            \Log::warning('Document download failed - file not found', ['document_id' => $doc->id, 'file_path' => $doc->file_path,'candidates' => $candidates]);
+                    session()->flash('error', 'File not found on server. It may have been removed during a redeploy. Please contact IT to re-upload this document.');
+            return null;        
+
+        }
+
+        $doc->incrementDownloadCount();
          // Also track in the audit trail
        $this->logActivity(
             'download_document',
-            'document',
-            "Downloaded document: {$this->document->title}",
-            ['document_id' => $this->document->id, 'file_name' => $this->document->file_name]
+            'documents',
+            "Downloaded document: {$doc->title}",
+            ['document_id' => $doc->id, 'file_name' => $doc->file_name]
     );
 
-    // Check if file exists
-    $filePath = storage_path('app/public/' . $this->document->file_path);
-
-    if (!file_exists($filePath)) {
-        session()->flash('error', 'File not found on server. Please contact the administrator.');
-        return null;
-    }
-    $safeName = $this->sanitizeFilename($this->document->file_name);
+    $safeName = $this->sanitizeFilename($doc->file_name);
 
     return response()->download($filePath, $safeName);
     }

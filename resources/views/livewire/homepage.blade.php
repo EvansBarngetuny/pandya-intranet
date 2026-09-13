@@ -565,9 +565,7 @@
                     <span class="text-sm text-gray-500">PICS v1.0</span>
                 </div>
                 <div class="flex space-x-4 mt-2 md:mt-0">
-                    <a href="#" class="text-sm text-gray-500 hover:text-gray-700">Help</a>
-                    <a href="#" class="text-sm text-gray-500 hover:text-gray-700">Privacy</a>
-                    <a href="#" class="text-sm text-gray-500 hover:text-gray-700">Contact IT</a>
+                    <span class="text-sm text-gray-500">developed by evans Kibitok</span>
                 </div>
             </div>
         </div>
