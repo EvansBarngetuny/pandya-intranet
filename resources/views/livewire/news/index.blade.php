@@ -56,9 +56,21 @@
             @forelse($news as $item)
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
                     @if($item->featured_image)
-                        <img src="{{ asset('storage/' . $item->featured_image) }}" 
-                             alt="{{ $item->title }}"
-                             class="w-full h-48 object-cover">
+                        @php
+        $imageExists = file_exists(storage_path('app/public/' . $item->featured_image));
+    @endphp
+    @if($imageExists)
+        <img src="{{ asset('storage/' . $item->featured_image) }}" 
+             alt="{{ $item->title }}"
+             class="w-full h-48 object-cover">
+    @else
+        <div class="w-full h-48 bg-gray-100 flex items-center justify-center">
+            <div class="text-center text-gray-400">
+                <div class="text-4xl mb-2">🖼️</div>
+                <p class="text-sm">Image not available</p>
+            </div>
+        </div>
+    @endif
                     @endif
                     
                     <div class="p-6">

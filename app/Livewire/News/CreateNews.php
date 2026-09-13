@@ -56,13 +56,18 @@ class CreateNews extends Component
         $this->validate();
         
         // Save featured image if uploaded
-        $imagePath = null;
-        if ($this->featured_image) {
-            $imagePath = $this->featured_image->store('news-images', 'public');
+       $imagePath = null;
+    if ($this->featured_image) {
+        $imagePath = $this->featured_image->store('news-images', 'public');
+
+        // Verify the upload succeeded
+        if (!$imagePath || !file_exists(storage_path('app/public/' . $imagePath))) {
+            session()->flash('error', 'Failed to store the featured image. Please try again.');
+            return null;
         }
-        
-        // Create slug
-        $slug = Str::slug($this->title) . '-' . uniqid();
+    }
+
+    $slug = Str::slug($this->title) . '-' . uniqid();
         
         // Create news
         News::create([
