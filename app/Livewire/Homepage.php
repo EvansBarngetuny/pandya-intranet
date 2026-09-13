@@ -20,6 +20,9 @@ class Homepage extends Component
     public $recentNews = [];
     public $upcomingEvents = [];
     public $unreadMemosCount = 0;
+    public $unreadNewsCount = 0;
+    public $unreadEventsCount = 0;
+    public $unreadDocumentsCount = 0;
     public $recentMemos = [];
     public $notifications = [];
     public $quickActions = [];
@@ -39,19 +42,35 @@ class Homepage extends Component
         $this->unreadMemosCount = $user->unreadMemos()->count();
 
         // Recent news (last 5)
-        $this->recentNews = News::where('published_at', '<=', now())
+       # $this->recentNews = News::where('published_at', '<=', now())
+         #   ->where('show_on_homepage', true)
+         #   ->orderBy('is_pinned', 'desc')
+          #  ->orderBy('published_at', 'desc')
+          #  ->limit(5)
+         #   ->get();
+         $this->unreadNewsCount = News::where('published_at', '<=', now())
             ->where('show_on_homepage', true)
-            ->orderBy('is_pinned', 'desc')
-            ->orderBy('published_at', 'desc')
-            ->limit(5)
-            ->get();
+            ->whereDoesntHave('acknowledgments', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->count();
 
         // Upcoming events (next 30 days)
-        $this->upcomingEvents = Event::where('start_datetime', '>=', now())
-            ->orderBy('start_datetime', 'asc')
-            ->limit(5)
-            ->get();
-
+        #$this->upcomingEvents = Event::where('start_datetime', '>=', now())
+          #  ->orderBy('start_datetime', 'asc')
+          #  ->limit(5)
+          #  ->get();
+          $this->$_COOKIEunreadEventsCount = Event::where('start_datetime', '>=', now())
+            ->whereDoesntHave('acknowledgments', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->count();
+            // ✅ Unacknowledged documents count (for this user)
+$this->unreadDocumentsCount = Document::where('is_active', true)
+    ->whereDoesntHave('acknowledgments', function ($q) use ($user) {
+        $q->where('user_id', $user->id);
+    })
+    ->count();
         // Recent memos for the user
         $this->recentMemos = Memo::where('status', 'published')
             ->where(function($q) use ($user) {

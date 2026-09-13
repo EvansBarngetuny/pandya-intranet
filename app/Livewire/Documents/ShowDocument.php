@@ -94,7 +94,7 @@ class ShowDocument extends Component
 
 
          // Also track in the audit trail
-       $this->ActivityLog(
+       $this->logActivity(
             'download_document',
             'document',
             "Downloaded document: {$this->document->title}",
@@ -103,6 +103,11 @@ class ShowDocument extends Component
 
     // Check if file exists
     $filePath = storage_path('app/public/' . $this->document->file_path);
+
+    if (!file_exists($filePath)) {
+        session()->flash('error', 'File not found on server. Please contact the administrator.');
+        return null;
+    }
     $safeName = $this->sanitizeFilename($this->document->file_name);
 
     return response()->download($filePath, $safeName);
