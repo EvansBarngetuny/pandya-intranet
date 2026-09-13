@@ -182,7 +182,7 @@
             <!-- ROW 1: Core Applications -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
                 <!-- News -->
-                <a href="{{ route('news.index') }}" class="block">
+                <a href="{{ route('news.index') }}" class="block relative">
                     <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
                         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📰</div>
                         <h3 class="font-semibold text-gray-800 text-sm">News</h3>
@@ -210,29 +210,29 @@
                 </a>
 
                 <!-- Events -->
-                <a href="{{ route('events.index') }}" class="block">
+                <a href="{{ route('events.index') }}" class="block relative">
                     <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
                         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📅</div>
                         <h3 class="font-semibold text-gray-800 text-sm">Events</h3>
                         <p class="text-xs text-gray-500 mt-1">Trainings</p>
-                        @if($unreadEventsCount  > 0)
-                              <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                              {{ $unreadEventsCount }}
-                              </span>
+                        @if($unreadEventsCount > 0)
+                            <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ $unreadEventsCount }}
+                            </span>
                         @endif
                     </div>
                 </a>
 
                 <!-- Policies/Documents -->
-                <a href="{{ route('documents.index') }}" class="block">
+                <a href="{{ route('documents.index') }}" class="block relative">
                     <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 text-center border border-gray-100 hover:border-blue-500 group">
                         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📚</div>
                         <h3 class="font-semibold text-gray-800 text-sm">Policies</h3>
                         <p class="text-xs text-gray-500 mt-1">SOPs & Forms</p>
                         @if($unreadDocumentsCount > 0)
-                           <span class="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            <span class="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                                 {{ $unreadDocumentsCount }}
-                           </span>
+                            </span>
                         @endif
                     </div>
                 </a>
