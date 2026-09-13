@@ -81,6 +81,7 @@ RUN ls -la public/build/ && ls -la public/build/assets/ | head -20
 
 # =========================================================
 # =========================================================
+# =========================================================
 # Stage 3: Production (Final image with FrankenPHP)
 # =========================================================
 FROM dunglas/frankenphp:php8.4 AS production
@@ -110,27 +111,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
+# Copy application from builder + Vite assets from frontend
 COPY --from=php-builder /var/www/html .
 
 COPY --from=frontend /var/www/html/public/build ./public/build
 
+# Create writable directories only — no artisan calls at build time
+# Note: Do NOT chown public/storage here — it doesn't exist until storage:link runs at runtime
 RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
-    storage/app/public/memos\
-    bootstrap/cache\
-    && chown -R www-data:www-data storage bootstrap/cache public/storage
-
-RUN chown -R www-data:www-data storage bootstrap/cache public/build
+    storage/app/public/memo-attachments \
+    bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache public/build
 
 EXPOSE 8000
 
 CMD ["sh", "-c", "\
-    php artisan config:cache && \
     php artisan storage:link && \
-     php artisan package:discover --ansi && \
+    chown -R www-data:www-data storage public/storage && \
+    php artisan package:discover --ansi && \
+    php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
     php artisan migrate --force && \
-    frankenphp php-server --listen :${PORT:-8000} --root public/"]
+    exec frankenphp php-server --listen :${PORT:-8000} --root public/"]
