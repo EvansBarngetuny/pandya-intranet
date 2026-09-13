@@ -58,7 +58,7 @@ class Homepage extends Component
             ->orderBy('start_datetime', 'asc')
             ->limit(5)
             ->get();
-        $$this->unreadNewsCount = News::where('published_at', '<=', now())
+        $this->unreadNewsCount = News::where('published_at', '<=', now())
              ->where('published_at', '>=', now()->subDays(7))
              ->where('show_on_homepage', true)
              ->count();
