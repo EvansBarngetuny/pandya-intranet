@@ -5,19 +5,36 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ReportsExport implements FromArray, WithHeadings, WithStyles
+class ReportsExport implements FromArray, WithHeadings, WithStyles, WithTitle
 {
     protected $data;
     protected $headings;
     protected $title;
     
-    public function __construct($data, $headings)
+    public function __construct($data, $headings = '', string $title = 'Report')
     {
-        $this->data = $data;
-        $this->headings = $headings;
-        $this->title = $title;
+         // Normalize data to a plain array of rows
+        if ($data instanceof \Illuminate\Support\Collection) {
+            $this->data = $data->values()->all();
+        } elseif (is_array($data)) {
+            $this->data = array_values($data);
+        } else {
+            $this->data = [];
+        }
+
+        // If headings is a string, treat it as the title and auto-detect headings
+        if (is_string($headings)) {
+            $this->title = $headings;
+            $this->headings = !empty($this->data) && is_array($this->data[0])
+                ? array_keys($this->data[0])
+                : ['No data available'];
+        } else {
+            $this->headings = $headings;
+            $this->title = $title;
+        }
     }
     
     public function array(): array
@@ -27,13 +44,10 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles
     
     public function headings(): array
     {
-        if ($this->data->isEmpty()) {
-            return ['No data available'];
-        }
-        return array_keys($this->data->first());
+        return $this->headings;
     }
     
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet) : array
     {
         return [
             1 => ['font' => ['bold' => true, 'size' => 12]],
@@ -41,6 +55,7 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles
     }
      public function title(): string
     {
-        return $this->title;
+        $clean = preg_replace('/[\\\\\\/\\?\\*\\[\\]:]/', '_', $this->title);
+        return substr($clean, 0, 31);
     }
 }
