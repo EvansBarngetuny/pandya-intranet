@@ -215,9 +215,9 @@
                         <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📅</div>
                         <h3 class="font-semibold text-gray-800 text-sm">Events</h3>
                         <p class="text-xs text-gray-500 mt-1">Trainings</p>
-                        @if($upcomingEventsCount > 0)
+                        @if($unreadEventsCount  > 0)
                               <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                              {{ $upcomingEventsCount }}
+                              {{ $unreadEventsCount }}
                               </span>
                         @endif
                     </div>
