@@ -145,10 +145,10 @@ public function submitForApproval()
         'audience_ids' => $recipients,
         'published_at' => $status === 'published' ? now() : null,
     ]);
-      if ($status === 'published') {
-        $memoData['published_at'] = now();
-        $memoData['published_by'] = auth()->id();
-    }
+     // if ($status === 'published') {
+       // $memoData['published_at'] = now();
+        //$memoData['published_by'] = auth()->id();
+    //}
 
     return $memo;
 }
