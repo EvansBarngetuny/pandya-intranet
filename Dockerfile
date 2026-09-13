@@ -120,7 +120,6 @@ RUN mkdir -p storage/framework/cache \
     storage/logs \
     storage/app/public/memos\
     bootstrap/cache\
-    && php artisan storage:link\
     && chown -R www-data:www-data storage bootstrap/cache public/storage
 
 RUN chown -R www-data:www-data storage bootstrap/cache public/build
